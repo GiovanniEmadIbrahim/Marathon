@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Leader Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" rel="stylesheet" />
+  <style>
+    .student-card {
+      padding: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+    .student-card img {
+      width: 80px;
+      height: auto;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <hgroup>
+      <h2>Leader Login</h2>
+      <h3>Enter password to access dashboard</h3>
+    </hgroup>
+    <form id="passwordForm">
+      <input type="password" id="leaderPassword" placeholder="Enter password" required />
+      <button type="submit">Enter</button>
+    </form>
+
+    <div id="dashboard" style="display:none;">
+      <nav class="container-fluid">
+        <ul>
+          <li><strong>Leader Dashboard</strong></li>
+        </ul>
+        <ul>
+          <li><a href="student.html">Student View</a></li>
+        </ul>
+      </nav>
+      <hgroup>
+        <h2>All Students</h2>
+        <h3>Edit points</h3>
+      </hgroup>
+      <div id="studentList"></div>
+    </div>
+  </main>
+
+  <script>
+    const form = document.getElementById('passwordForm');
+    const dashboard = document.getElementById('dashboard');
+    const studentList = document.getElementById('studentList');
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const enteredPassword = document.getElementById('leaderPassword').value;
+      if (enteredPassword === '2580') {
+        form.style.display = 'none';
+        dashboard.style.display = 'block';
+        renderStudents();
+      } else {
+        alert('Incorrect password');
+      }
+    });
+
+    function renderStudents() {
+      const students = JSON.parse(localStorage.getItem('students') || '[]');
+      studentList.innerHTML = '';
+
+      students.forEach(({ name, points, image, mobile }, index) => {
+        const div = document.createElement('div');
+        div.className = 'student-card';
+        div.innerHTML = `
+          <img src="${image}" alt="Profile image" />
+          <div>
+            <strong>${name}</strong><br/>
+            <small>Mobile: ${mobile}</small><br/>
+            Points: <input type="number" value="${points}" data-index="${index}" style="width: 60px" />
+            <button data-save="${index}" style="margin-left: 10px">Save</button>
+          </div>
+        `;
+        studentList.appendChild(div);
+      });
+
+      document.querySelectorAll('button[data-save]').forEach(button => {
+        button.addEventListener('click', () => {
+          const index = button.getAttribute('data-save');
+          const input = document.querySelector(`input[data-index='${index}']`);
+          const students = JSON.parse(localStorage.getItem('students') || '[]');
+          students[index].points = parseInt(input.value);
+          localStorage.setItem('students', JSON.stringify(students));
+          alert('Points updated');
+        });
+      });
+    }
+  </script>
+</body>
+</html>

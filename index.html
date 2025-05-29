@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Student Portal</title>
+  <link href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" rel="stylesheet" />
+  <style>
+    img.preview {
+      max-width: 100px;
+      height: auto;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <nav class="container-fluid">
+    <ul>
+      <li><strong>Student Dashboard</strong></li>
+    </ul>
+    <ul>
+      <li><a href="leader.html">Leader View</a></li>
+    </ul>
+  </nav>
+  <main class="container">
+    <hgroup>
+      <h2>Student Login</h2>
+      <h3>Login with your mobile number</h3>
+    </hgroup>
+
+    <form id="loginForm">
+      <input type="text" id="mobileNumber" placeholder="Mobile Number" required />
+      <button type="submit">Login</button>
+    </form>
+
+    <div id="profileSection" style="display:none;">
+      <hgroup>
+        <h3>Your Profile</h3>
+      </hgroup>
+      <img id="studentImage" class="preview" />
+      <p><strong>Name:</strong> <span id="studentName"></span></p>
+      <p><strong>Points:</strong> <span id="studentPoints"></span></p>
+    </div>
+
+    <div id="registrationSection" style="display:none;">
+      <hgroup>
+        <h3>Register as New Student</h3>
+      </hgroup>
+      <form id="registerForm">
+        <input type="text" id="regName" placeholder="Your name" required />
+        <input type="text" id="regMobile" placeholder="Mobile Number" required />
+        <input type="file" id="regImage" accept="image/*" required />
+        <img id="regPreview" class="preview" style="display:none;" />
+        <button type="submit">Register</button>
+      </form>
+    </div>
+  </main>
+
+  <script>
+    const loginForm = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
+    const profileSection = document.getElementById('profileSection');
+    const registrationSection = document.getElementById('registrationSection');
+    const studentName = document.getElementById('studentName');
+    const studentPoints = document.getElementById('studentPoints');
+    const studentImage = document.getElementById('studentImage');
+    const regPreview = document.getElementById('regPreview');
+
+    let students = JSON.parse(localStorage.getItem('students') || '[]');
+
+    loginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const mobile = document.getElementById('mobileNumber').value;
+      const student = students.find(s => s.mobile === mobile);
+
+      if (student) {
+        loginForm.style.display = 'none';
+        profileSection.style.display = 'block';
+        studentName.textContent = student.name;
+        studentPoints.textContent = student.points;
+        studentImage.src = student.image;
+      } else {
+        alert('No student found. Please register.');
+        loginForm.style.display = 'none';
+        registrationSection.style.display = 'block';
+        document.getElementById('regMobile').value = mobile;
+      }
+    });
+
+    document.getElementById('regImage').addEventListener('change', function () {
+      const file = this.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          regPreview.src = e.target.result;
+          regPreview.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    registerForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = document.getElementById('regName').value;
+      const image = regPreview.src;
+      const mobile = document.getElementById('regMobile').value;
+
+      const newStudent = { name, points: 0, image, mobile };
+      students.push(newStudent);
+      localStorage.setItem('students', JSON.stringify(students));
+      alert('Registered successfully! Please login again.');
+      window.location.reload();
+    });
+  </script>
+</body>
+</html>
